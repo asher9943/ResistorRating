@@ -34,7 +34,7 @@ band3 = {
 # setup main window
 root = Tk()
 root.title('ResistorRating')
-root.geometry('500x500')
+root.geometry('500x250')
 
 # setup notebook (tabbed view)
 nb = ttk.Notebook(root)
@@ -78,6 +78,15 @@ def advbandval(band, bandnum):
             bandvals[bandnum] *= 2
         band.configure(bg=band3[bandvals[bandnum]])
 
+#function to calculate resistor rating
+def calcrating(calcbutton):
+    rating = (bandvals[0] + bandvals[1]) * bandvals[2]
+    calcbutton.configure(text='Rating: ' + "{0:.2f}".format(rating) + 'Ω, ' + str(bandvals[3]) + '% Tolerance')
+
+#function to set resistor bands based
+def setresistor():
+    print('set resistor')
+
 # buttons for resistor bands
 colorbutton0 = Button(colorcanvas, bg=bands01[bandvals[0]], command = lambda: advbandval(colorbutton0, 0))
 colorbutton0.pack()
@@ -91,14 +100,40 @@ colorbutton2.place(x=225, y=35, bordermode = OUTSIDE, height=50, width=10)
 colorbutton3 = Button(colorcanvas, bg=band3[bandvals[3]], command = lambda: advbandval(colorbutton3, 3))
 colorbutton3.pack()
 colorbutton3.place(x=300, y=35, bordermode = OUTSIDE, height=50, width=10)
+calcbutton = Button(bycolors, text = 'Calculate', command = lambda: calcrating(calcbutton))
+calcbutton.pack()
 
 # tab for resistor colors by rating
 byrating = ttk.Frame(nb)
 nb.add(byrating, text='By Rating')
+
+# canvas for resistor image
+ratingcanvas = Canvas(byrating, width=500, height=160)
+ratingcanvas.pack()
+
+# add resistor as background image of canvas
+ratingcanvas.create_image(250, 20, anchor=N, image=img)
+
+# buttons for resistor bands
+ratingbutton0 = Button(ratingcanvas, bg='black', state=DISABLED)
+ratingbutton0.pack()
+ratingbutton0.place(x=175, y=35, bordermode = OUTSIDE, height=50, width=10)
+ratingbutton1 = Button(ratingcanvas, bg='black', state=DISABLED)
+ratingbutton1.pack()
+ratingbutton1.place(x=200, y=35, bordermode = OUTSIDE, height=50, width=10)
+ratingbutton2 = Button(ratingcanvas, bg='silver', state=DISABLED)
+ratingbutton2.pack()
+ratingbutton2.place(x=225, y=35, bordermode = OUTSIDE, height=50, width=10)
+ratingbutton3 = Button(ratingcanvas, bg='brown', state=DISABLED)
+ratingbutton3.pack()
+ratingbutton3.place(x=300, y=35, bordermode = OUTSIDE, height=50, width=10)
+ratingentry = Entry(byrating)
+ratingentry.pack()
+resistorsetbutton = Button(byrating, text = 'Begin')
+resistorsetbutton.pack()
 
 # tab for chart of resistor colors
 chart = ttk.Frame(nb)
 nb.add(chart, text='Chart')
 
 root.mainloop()
-
