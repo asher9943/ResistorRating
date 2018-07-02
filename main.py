@@ -100,7 +100,7 @@ def gettolerance(rating, band0, band1, band2, band3, setbtn, entry):
 # function to set resistor bands based
 def setresistor(band0, band1, band2, band3, setbtn, entry, rating, tolerance):
     ratingbands01 = rating
-    if (rating >= 1):
+    if (rating >= 1 and rating == int(rating)):
         if (int(rating) % 10 == 0 and int(rating) % 100 == 0 and int(rating) % 1000 == 0 and int(rating) % 10000 == 0 and int(rating) % 100000 == 0 and int(rating) % 1000000 == 0):
             i = 0
             while (ratingbands01 >= 10):
@@ -117,6 +117,23 @@ def setresistor(band0, band1, band2, band3, setbtn, entry, rating, tolerance):
             band0.configure(bg=bands01colors[int(ratingbands01/10)])
             band1.configure(bg=bands01colors[int(ratingbands01%10)])
             band2.configure(bg=band2colors[10**i])
+    else:
+        if (rating > 1):
+            band0.configure(bg=bands01colors[int(rating)])
+            band1.configure(bg=bands01colors[int(10*(rating-int(rating)))])
+            band2.configure(bg=band2colors[.1])
+        elif (rating >= .1 and rating * 10 == int(rating * 10)):
+            band0.configure(bg=bands01colors[0])
+            band1.configure(bg=bands01colors[int(ratingbands01*10)])
+            band2.configure(bg=band2colors[.1])
+        elif (rating >= .01 and rating < .1):
+            band0.configure(bg=bands01colors[0])
+            band1.configure(bg=bands01colors[int(ratingbands01 * 100)])
+            band2.configure(bg=band2colors[.01])
+        else:
+            band0.configure(bg=bands01colors[int(rating * 10)])
+            band1.configure(bg=bands01colors[(100 * rating) - (int(rating * 10) * 10)])
+            band2.configure(bg=band2colors[.01])
     if (tolerance == '1%'):
         band3.configure(bg=band3colors[1])
     elif (tolerance == '2%'):
