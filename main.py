@@ -1,8 +1,9 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 
 # dictionary with band values and corresponding colors
-bands01 = {
+bands01colors = {
     0 : 'black',
     1 : 'brown',
     2 : 'red',
@@ -14,7 +15,7 @@ bands01 = {
     8 : 'grey',
     9 : 'white'
 }
-band2 = {
+band2colors = {
     .01 : 'silver',
     .1 : 'gold',
     1 : 'black',
@@ -25,12 +26,13 @@ band2 = {
     100000 : 'green',
     1000000 : 'blue'
 }
-band3 = {
+band3colors = {
     1 : 'brown',
     2 : 'red',
     5 : 'gold',
     10 : 'silver',
 }
+
 # setup main window
 root = Tk()
 root.title('ResistorRating')
@@ -62,13 +64,13 @@ def advbandval(band, bandnum):
             bandvals[bandnum] = 0
         else:
             bandvals[bandnum] += 1
-        band.configure(bg=bands01[bandvals[bandnum]])
+        band.configure(bg=bands01colors[bandvals[bandnum]])
     elif bandnum == 2:
         if bandvals[bandnum] == 1000000:
             bandvals[bandnum] = .01
         else:
             bandvals[bandnum] *= 10
-        band.configure(bg=band2[bandvals[bandnum]])
+        band.configure(bg=band2colors[bandvals[bandnum]])
     elif bandnum == 3:
         if bandvals[bandnum] == 2:
             bandvals[bandnum] = 5
@@ -76,28 +78,67 @@ def advbandval(band, bandnum):
             bandvals[bandnum] = 1
         else:
             bandvals[bandnum] *= 2
-        band.configure(bg=band3[bandvals[bandnum]])
+        band.configure(bg=band3colors[bandvals[bandnum]])
 
-#function to calculate resistor rating
+# function to calculate resistor rating
 def calcrating(calcbutton):
     rating = (bandvals[0] + bandvals[1]) * bandvals[2]
     calcbutton.configure(text='Rating: ' + "{0:.2f}".format(rating) + 'Ω, ' + str(bandvals[3]) + '% Tolerance')
 
-#function to set resistor bands based
-def setresistor():
-    print('set resistor')
+def getrating(band0, band1, band2, band3, setbtn, entry):
+    rating = float(entry.get())
+    setbtn.configure(text='Enter Tolerance (%)', command=lambda: gettolerance(rating, band0, band1, band2, band3, setbtn, entry))
+    if (rating > 99000000 or rating < .01):
+        messagebox.showerror('Rating', 'Unsupported Rating, try again')
+        setbtn.configure(text='Enter Rating (Ω)', command=lambda: getrating(band0, band1, band2, band3, setbtn, entry))
+    entry.delete(0, 'end')
 
+def gettolerance(rating, band0, band1, band2, band3, setbtn, entry):
+    tolerance = str(entry.get())
+    setresistor(band0, band1, band2, band3, setbtn, entry, rating, tolerance)
+
+# function to set resistor bands based
+def setresistor(band0, band1, band2, band3, setbtn, entry, rating, tolerance):
+    ratingbands01 = rating
+    if (rating >= 1):
+        if (int(rating) % 10 == 0 and int(rating) % 100 == 0 and int(rating) % 1000 == 0 and int(rating) % 10000 == 0 and int(rating) % 100000 == 0 and int(rating) % 1000000 == 0):
+            i = 0
+            while (ratingbands01 >= 10):
+                ratingbands01 /= 10
+                i += 1
+            band0.configure(bg=bands01colors[0])
+            band1.configure(bg=bands01colors[int(ratingbands01)])
+            band2.configure(bg=band2colors[10**i])
+        else:
+            i = 0
+            while (ratingbands01 > 100):
+                ratingbands01 /= 10
+                i += 1
+            band0.configure(bg=bands01colors[int(ratingbands01/10)])
+            band1.configure(bg=bands01colors[int(ratingbands01%10)])
+            band2.configure(bg=band2colors[10**i])
+    if (tolerance == '1%'):
+        band3.configure(bg=band3colors[1])
+    elif (tolerance == '2%'):
+        band3.configure(bg=band3colors[2])
+    elif (tolerance == '5%'):
+        band3.configure(bg=band3colors[5])
+    elif (tolerance == '10%'):
+        band3.configure(bg=band3colors[10])
+    else:
+        messagebox.showerror('Tolerance', 'Unsupported Resistor Tolerance, try again')
+        #add messagebox here for illegal tolerance, messagebox for out of bounds rating (high and low), and clear entryh between rating and tolerance entry
 # buttons for resistor bands
-colorbutton0 = Button(colorcanvas, bg=bands01[bandvals[0]], command = lambda: advbandval(colorbutton0, 0))
+colorbutton0 = Button(colorcanvas, bg=bands01colors[bandvals[0]], command = lambda: advbandval(colorbutton0, 0))
 colorbutton0.pack()
 colorbutton0.place(x=175, y=35, bordermode = OUTSIDE, height=50, width=10)
-colorbutton1 = Button(colorcanvas, bg=bands01[bandvals[1]], command = lambda: advbandval(colorbutton1, 1))
+colorbutton1 = Button(colorcanvas, bg=bands01colors[bandvals[1]], command = lambda: advbandval(colorbutton1, 1))
 colorbutton1.pack()
 colorbutton1.place(x=200, y=35, bordermode = OUTSIDE, height=50, width=10)
-colorbutton2 = Button(colorcanvas, bg=band2[bandvals[2]], command = lambda: advbandval(colorbutton2, 2))
+colorbutton2 = Button(colorcanvas, bg=band2colors[bandvals[2]], command = lambda: advbandval(colorbutton2, 2))
 colorbutton2.pack()
 colorbutton2.place(x=225, y=35, bordermode = OUTSIDE, height=50, width=10)
-colorbutton3 = Button(colorcanvas, bg=band3[bandvals[3]], command = lambda: advbandval(colorbutton3, 3))
+colorbutton3 = Button(colorcanvas, bg=band3colors[bandvals[3]], command = lambda: advbandval(colorbutton3, 3))
 colorbutton3.pack()
 colorbutton3.place(x=300, y=35, bordermode = OUTSIDE, height=50, width=10)
 calcbutton = Button(bycolors, text = 'Calculate', command = lambda: calcrating(calcbutton))
@@ -129,11 +170,15 @@ ratingbutton3.pack()
 ratingbutton3.place(x=300, y=35, bordermode = OUTSIDE, height=50, width=10)
 ratingentry = Entry(byrating)
 ratingentry.pack()
-resistorsetbutton = Button(byrating, text = 'Begin')
+resistorsetbutton = Button(byrating, text = 'Enter Rating (Ω)', command=lambda: getrating(ratingbutton0, ratingbutton1, ratingbutton2, ratingbutton3, resistorsetbutton, ratingentry))
 resistorsetbutton.pack()
 
 # tab for chart of resistor colors
 chart = ttk.Frame(nb)
 nb.add(chart, text='Chart')
+chartcanvas = Canvas(chart, width=500, height=160)
+chartcanvas.pack()
+chartimg = PhotoImage(file="resistorcolorchart.png")
+chartcanvas.create_image(2, 2, anchor=CENTER, image=chartimg)
 
 root.mainloop()
